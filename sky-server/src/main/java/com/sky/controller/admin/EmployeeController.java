@@ -90,6 +90,8 @@ public class EmployeeController {
     return Result.success();
     }
 
+
+
     /**
      * 用户分页查询
      * @param employeePageQueryDTO
@@ -103,4 +105,33 @@ public class EmployeeController {
         return Result.success(pageResult);
     }
 
+    @PostMapping("/status/{status}")
+    @ApiOperation("启用/禁用员工账号")
+    public Result startOrStop(@PathVariable Integer status, Long id) {
+        log.info("启用/禁用员工账号：{},{}",status,id);
+        employeeService.StartOrStop(status, id);
+        return Result.success();
+    }
+
+    /**
+     * 根据id查询员工信息
+     * @param id
+     * @return
+     */
+    @GetMapping("/{id}")
+    @ApiOperation("根据id查询员工信息")
+    public Result<Employee> getById(@PathVariable Long id) {
+        log.info("根据id查询员工信息");
+        Employee employee = employeeService.getById(id);
+        employee.setPassword("****"); //保护密码
+        return Result.success(employee);
+    }
+
+    @PutMapping("")
+    @ApiOperation("编辑员工信息")
+    public Result edit(@RequestBody EmployeeDTO employeeDTO){
+        log.info("编辑员工信息");
+        employeeService.edit(employeeDTO);
+        return Result.success();
+    }
 }
