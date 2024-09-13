@@ -63,6 +63,6 @@ public class AliOssUtil {
 
         log.info("文件上传到:{}", stringBuilder.toString());
 
-        return stringBuilder.toString();
+        return stringBuilder.toString(); //返回的是访问网址
     }
 }
