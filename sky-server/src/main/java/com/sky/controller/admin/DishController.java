@@ -5,11 +5,14 @@ import com.sky.dto.DishPageQueryDTO;
 import com.sky.result.PageResult;
 import com.sky.result.Result;
 import com.sky.service.DishService;
+import com.sky.vo.DishVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @ClassName DishController
@@ -36,7 +39,7 @@ public class DishController {
     @ApiOperation("新增菜品")
     public Result save(@RequestBody DishDTO dishDTO) { //ResquestBody 封装json格式的数据
         log.info("新增菜品：{}",dishDTO);
-        dishService.saveWithFlavor(dishDTO);
+        dishService.insertWithFlavor(dishDTO);
         return Result.success();
     }
 
@@ -51,6 +54,41 @@ public class DishController {
         log.info("分页查询：{}",dishPageQueryDTO);
         PageResult pageResult = dishService.page(dishPageQueryDTO);
         return Result.success(pageResult);
+    }
+
+    /**
+     * 请求方式；query,地址栏?id=1,2,3...
+     * 删除菜品
+     * 1 单个菜品删除/批量删除
+     * 2 起售的菜品不能删除
+     * 被套餐关联的菜品不能删除
+     * 菜品删除时，对应的口味也要删除
+     * @param ids
+     * @return
+     */
+    @DeleteMapping
+    @ApiOperation("批量删除菜品")
+    public Result deleteDish(@RequestParam List<Long> ids) {
+        log.info("菜品批量删除：{}",ids);
+        dishService.deleteDish(ids);
+        return Result.success();
+    }
+
+    @GetMapping("/{id}")
+    @ApiOperation("根据id查询菜品，包括分类和口味")
+    public Result<DishVO> queryDishVO(@PathVariable Long id) {
+        log.info("根据id查询dish，包括分类和口味List: #{}", id);
+        DishVO dishVO = dishService.queryDishVO(id);
+        return Result.success(dishVO);
+    }
+
+    @PutMapping
+    @ApiOperation("修改菜品信息")
+    public Result updateDish(@RequestBody DishDTO dishDTO) {
+        log.info("修改菜品：{}",dishDTO);
+        dishService.updateDishWithFlavor(dishDTO);
+
+        return Result.success();
     }
 
 }

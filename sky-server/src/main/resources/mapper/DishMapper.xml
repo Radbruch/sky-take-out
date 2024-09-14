@@ -20,17 +20,53 @@
         SELECT dish.*, category.name AS categoryName FROM dish LEFT JOIN category ON dish.category_id = category.id
         <where>
             <if test="name != null and name != ''">
-                and name like concat('%',#{name},'%')
+                and dish.name like concat('%',#{name},'%')
             </if>
-            <if test="categoryId != null and categoryId != ''">
-                and category_id = #{categoryId}
+            <if test="categoryId != null">
+                and dish.category_id = #{categoryId}
             </if>
-            <if test="status != null and status != ''">
-                and status = #{status}
+            <if test="status != null">
+                and dish.status = #{status}
             </if>
         </where>
         ORDER BY category.sort ASC
     </select>
 
 
+    <delete id="deleteDish">
+        DELETE FROM dish WHERE id IN
+        <foreach collection="ids" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+
+    <delete id="deleteFlavor">
+        DELETE FROM dish_flavor WHERE dish_id IN
+        <foreach collection="dishIds" separator="," open="(" close=")" item="dishId">
+            #{dishId}
+        </foreach>
+    </delete>
+
+    <select id="queryDishVOById" resultType="com.sky.vo.DishVO">
+        SELECT dish.*, category.name AS categoryName
+        FROM dish
+            LEFT JOIN category ON dish.category_id = category.id
+        WHERE dish.id = #{id}
+    </select>
+
+
+    <update id="updateDish">
+        UPDATE dish
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="categoryId != null">category_id = #{categoryId},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="image != null">image = #{image},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateUser != null">update_user = #{updateUser},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
 </mapper>
