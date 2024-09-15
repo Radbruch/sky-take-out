@@ -7,7 +7,6 @@ import com.sky.entity.Dish;
 import com.sky.entity.DishFlavor;
 import com.sky.enumeration.OperationType;
 import com.sky.vo.DishVO;
-import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
@@ -83,4 +82,6 @@ public interface DishMapper {
     @AutoFill(value = OperationType.UPDATE)
     void updateDish(Dish dish);
 
+    @Select("SELECT * FROM dish WHERE category_id = #{categoryId}")
+    List<Dish> queryDishByCategoryId(Long categoryId);
 }
