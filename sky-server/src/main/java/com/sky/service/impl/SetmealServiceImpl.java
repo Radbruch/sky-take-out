@@ -75,4 +75,13 @@ public class SetmealServiceImpl implements SetmealService {
         List<SetmealVO> records = page.getResult();
         return new PageResult(total, records);
     }
+
+    @Override
+    public void StartOrStop(Integer status, Long id) {
+        Setmeal setmeal = Setmeal.builder()
+                .status(status)
+                .id(id)
+                .build();
+        setmealMapper.StartOrStop(setmeal);
+    }
 }

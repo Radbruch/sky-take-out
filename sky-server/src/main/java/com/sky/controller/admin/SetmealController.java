@@ -55,4 +55,12 @@ public class SetmealController {
         PageResult pageResult = setmealService.page(setmealPageQueryDTO);
         return Result.success(pageResult);
     }
+
+    @PostMapping("/status/{status}")
+    @ApiOperation("套餐起售、停售")
+    public Result StartOrStop(@PathVariable Integer status, Long id){
+        log.info("套餐起售、停售:status:{},id:{}", status, id);
+        setmealService.StartOrStop(status, id);
+        return Result.success();
+    }
 }

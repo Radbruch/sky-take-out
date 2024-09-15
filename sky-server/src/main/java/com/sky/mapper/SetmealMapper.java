@@ -9,6 +9,7 @@ import com.sky.vo.SetmealVO;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -44,4 +45,12 @@ public interface SetmealMapper {
      * @return
      */
     Page<SetmealVO> pageQuery(SetmealPageQueryDTO setmealPageQueryDTO);
+
+    /**
+     * 起售、停售
+     * @param setmeal
+     */
+    @Update("UPDATE setmeal SET status = #{status} WHERE id = #{id}")
+    @AutoFill(value = OperationType.UPDATE)
+    void StartOrStop(Setmeal setmeal);
 }
