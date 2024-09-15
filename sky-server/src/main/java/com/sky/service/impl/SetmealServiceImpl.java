@@ -1,10 +1,13 @@
 package com.sky.service.impl;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.sky.constant.MessageConstant;
+import com.sky.constant.StatusConstant;
 import com.sky.dto.SetmealDTO;
 import com.sky.dto.SetmealPageQueryDTO;
 import com.sky.entity.Setmeal;
 import com.sky.entity.SetmealDish;
+import com.sky.exception.DeletionNotAllowedException;
 import com.sky.mapper.SetmealDishMapper;
 import com.sky.mapper.SetmealMapper;
 
@@ -83,5 +86,40 @@ public class SetmealServiceImpl implements SetmealService {
                 .id(id)
                 .build();
         setmealMapper.StartOrStop(setmeal);
+    }
+
+    @Transactional
+    @Override
+    public void updateSetmealWithDish(SetmealDTO setmealDTO) {
+        Setmeal setmeal = new Setmeal();
+        BeanUtils.copyProperties(setmealDTO, setmeal);
+        setmealMapper.updateSetmeal(setmeal); //更新套餐
+
+        Long setmealId = setmeal.getId();//主键回显拿到新增的setmeal id
+        log.info("回显的sealmeal_id = ", setmealId);
+        // 回显的setmeal_id赋值给 setmealDishes里的每个菜
+        List<SetmealDish> setmealDishes = setmealDTO.getSetmealDishes();
+        if (setmealDishes != null && setmealDishes.size() > 0) {
+            setmealDishes.forEach(setmealDish ->
+            {setmealDish.setSetmealId(setmealId);});
+        }
+
+        setmealDishMapper.deleteDishBySetmealId(setmealId);
+        setmealDishMapper.insertSetmealDish(setmealDishes);
+    }
+
+    @Transactional
+    @Override
+    public void deleteSetmealBatch(List<Long> ids) {
+        // 1. 判断套餐是否是起售状态
+        for (Long id : ids) {
+            SetmealVO setmealVO = setmealMapper.querySetmealById(id);
+            if (setmealVO.getStatus() == StatusConstant.ENABLE) {
+                throw new DeletionNotAllowedException(MessageConstant.DISH_ON_SALE);
+            }
+        }
+        setmealMapper.deleteSetmealBatch(ids);
+        setmealDishMapper.deleteDishBatchBySetmealId(ids);
+
     }
 }

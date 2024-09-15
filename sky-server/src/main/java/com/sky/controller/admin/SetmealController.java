@@ -17,8 +17,11 @@ import com.sky.vo.SetmealVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 套餐管理
@@ -61,6 +64,23 @@ public class SetmealController {
     public Result StartOrStop(@PathVariable Integer status, Long id){
         log.info("套餐起售、停售:status:{},id:{}", status, id);
         setmealService.StartOrStop(status, id);
+        return Result.success();
+    }
+
+    @PutMapping
+    @ApiOperation("修改套餐")
+    public Result updateSetmealWithDish(@RequestBody SetmealDTO setmealDTO){
+        setmealService.updateSetmealWithDish(setmealDTO);
+        return Result.success();
+    }
+
+    @DeleteMapping()
+    @ApiOperation("批量删除套餐")
+    public Result deleteSetmealBatch(@RequestParam List<Long> ids){
+        log.info("批量删除套餐：{}", ids);
+        // 1. 在售的套餐不可删除
+        // 2. 删除套餐的同时，包含的菜品一起删除
+        setmealService.deleteSetmealBatch(ids);
         return Result.success();
     }
 }

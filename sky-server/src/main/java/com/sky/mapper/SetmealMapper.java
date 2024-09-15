@@ -50,7 +50,20 @@ public interface SetmealMapper {
      * 起售、停售
      * @param setmeal
      */
-    @Update("UPDATE setmeal SET status = #{status} WHERE id = #{id}")
+    @Update("UPDATE setmeal SET status = #{status},update_time = #{updateTime},update_user=#{updateUser} WHERE id = #{id}")
     @AutoFill(value = OperationType.UPDATE)
     void StartOrStop(Setmeal setmeal);
+
+    /**
+     * 更新套餐
+     * @param setmeal
+     */
+    @AutoFill(value = OperationType.UPDATE)
+    void updateSetmeal(Setmeal setmeal);
+
+    /**
+     * 批量删除套餐
+     * @param ids
+     */
+    void deleteSetmealBatch(List<Long> ids);
 }

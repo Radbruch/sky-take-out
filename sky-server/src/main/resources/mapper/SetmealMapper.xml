@@ -10,6 +10,7 @@
         VALUES
         (#{categoryId},#{name},#{price},#{description},#{image},#{status},#{createTime},#{updateTime},#{createUser},#{updateUser})
     </insert>
+
     <select id="pageQuery" resultType="com.sky.vo.SetmealVO">
         SELECT setmeal.*, category.name AS categoryName
         FROM setmeal LEFT JOIN category
@@ -21,6 +22,29 @@
         </where>
         ORDER BY category.sort ASC
     </select>
+
+    <update id="updateSetmeal">
+        UPDATE setmeal
+        <set>
+            <if test="categoryId != null">category_id=#{categoryId},</if>
+            <if test="description != null">description=#{description},</if>
+            <if test="id != null">id=#{id},</if>
+            <if test="image != null">image=#{image},</if>
+            <if test="name != null and name != ''">name=#{name},</if>
+            <if test="price != null">price=#{price},</if>
+            <if test="status != null">status=#{status},</if>
+            <if test="updateTime != null">update_time=#{updateTime},</if>
+            <if test="updateUser != null">update_user=#{updateUser},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteSetmealBatch">
+        DELETE FROM setmeal WHERE id IN
+        <foreach collection="ids" separator="," open="(" close=")" item="id">
+            #{id}
+        </foreach>
+    </delete>
 </mapper>
 
 
