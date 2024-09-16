@@ -13,6 +13,7 @@ import com.sky.mapper.SetmealMapper;
 
 import com.sky.result.PageResult;
 import com.sky.service.SetmealService;
+import com.sky.vo.DishItemVO;
 import com.sky.vo.SetmealVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -121,5 +122,17 @@ public class SetmealServiceImpl implements SetmealService {
         setmealMapper.deleteSetmealBatch(ids);
         setmealDishMapper.deleteDishBatchBySetmealId(ids);
 
+    }
+
+    @Override
+    public List<Setmeal> querySetmealsByCategoryId(Long categoryId) {
+        List<Setmeal> setmeals = setmealMapper.querySetmealsByCategoryId(categoryId);
+        return setmeals;
+    }
+
+    @Override
+    public List<DishItemVO> queryDishItemVOBySetmealId(Long setmealId) {
+        List<DishItemVO> dishes = setmealDishMapper.queryDishItemBySetmealId(setmealId);
+        return dishes;
     }
 }

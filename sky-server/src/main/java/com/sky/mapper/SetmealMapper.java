@@ -66,4 +66,7 @@ public interface SetmealMapper {
      * @param ids
      */
     void deleteSetmealBatch(List<Long> ids);
+
+    @Select("SELECT * FROM setmeal WHERE category_id = #{categoryId}")
+    List<Setmeal> querySetmealsByCategoryId(Long categoryId);
 }
