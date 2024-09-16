@@ -46,4 +46,11 @@ public interface CategoryService {
      * @return
      */
     List<Category> list(Integer type);
+
+    /**
+     * 根据type(1菜品分类 2套餐分类)查询category
+     * @param type
+     * @return
+     */
+    List<Category> queryCategoryByType(Integer type);
 }

@@ -129,4 +129,10 @@ public class CategoryServiceImpl implements CategoryService {
     public List<Category> list(Integer type) {
         return categoryMapper.list(type);
     }
+
+    @Override
+    public List<Category> queryCategoryByType(Integer type) {
+        List<Category> categorys = categoryMapper.list(type);
+        return categorys;
+    }
 }
