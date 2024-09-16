@@ -45,4 +45,6 @@ public interface DishService {
     void startOrStop(Integer status, Long id);
 
     List<Dish> queryDishByCategoryId(Long categoryId);
+
+    List<DishVO> queryDishVOByCategoryId(Long categoryId);
 }
