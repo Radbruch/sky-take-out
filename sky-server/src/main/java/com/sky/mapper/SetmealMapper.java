@@ -67,6 +67,11 @@ public interface SetmealMapper {
      */
     void deleteSetmealBatch(List<Long> ids);
 
-    @Select("SELECT * FROM setmeal WHERE category_id = #{categoryId}")
+    /**
+     * user端，通过categoryId查套餐
+     * @param categoryId
+     * @return
+     */
+    @Select("SELECT * FROM setmeal WHERE category_id = #{categoryId} AND status = 1")
     List<Setmeal> querySetmealsByCategoryId(Long categoryId);
 }
