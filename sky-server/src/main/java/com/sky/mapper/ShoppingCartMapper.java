@@ -1,9 +1,6 @@
 package com.sky.mapper;
 
-import com.sky.annocation.AutoFill;
-import com.sky.dto.ShoppingCartDTO;
 import com.sky.entity.ShoppingCart;
-import com.sky.enumeration.OperationType;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
