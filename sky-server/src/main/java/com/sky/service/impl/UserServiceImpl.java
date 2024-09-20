@@ -48,8 +48,9 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public User wxLogin(UserLoginDTO userLoginDTO) {
-        String openId = getOpenId(userLoginDTO.getCode());
-
+        Map<String, String> userInfo = getOpenId(userLoginDTO.getCode());
+        String openId = userInfo.get("openId");
+        String userName = userInfo.get("nickname");
         //判断openid是否为null，如果为空表示登录失败，抛出业务异常
         if (openId == null) {
             throw new LoginFailedException(MessageConstant.LOGIN_FAILED);
@@ -61,6 +62,7 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             user = User.builder()
                     .openid(openId)
+                    .name(userName)
                     .createTime(LocalDateTime.now())
                     .build();
             userMapper.insert(user);
@@ -74,7 +76,7 @@ public class UserServiceImpl implements UserService {
      * @param code
      * @return
      */
-    private String getOpenId(String code) {
+    private Map<String, String> getOpenId(String code) {
         //调用微信接口服务，获取当前微信用户的openid
         Map<String, String> map = new HashMap<>();
         map.put("appid", weChatProperties.getAppid());
@@ -85,6 +87,9 @@ public class UserServiceImpl implements UserService {
 
         JSONObject jsonObject = JSONObject.parseObject(json);
         String openId = jsonObject.getString("openid");
-        return openId;
+        map.put("openId", openId);
+        String nickname = jsonObject.getString("nickname");
+        map.put("nickname", nickname);
+        return map;
     }
 }
