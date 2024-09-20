@@ -1,9 +1,13 @@
 package com.sky.controller.user;
 
+import com.github.pagehelper.Page;
+import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
+import com.sky.result.PageResult;
 import com.sky.result.Result;
 import com.sky.service.OrderService;
+import com.sky.vo.OrderDetailVO;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
 import io.swagger.annotations.Api;
@@ -21,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
  **/
 @RestController
 @RequestMapping("/user/order")
-@Api("订单相关")
+@Api(tags = "订单相关")
 @Slf4j
 public class OrderController {
 
@@ -50,5 +54,34 @@ public class OrderController {
         return Result.success(orderPaymentVO);
     }
 
+    @GetMapping("orderDetail/{id}")
+    @ApiOperation("历史订单查询")
+    public Result<OrderDetailVO> orderDetail(@PathVariable Long id) {
+        OrderDetailVO orderDetailVO = orderService.orderDetail(id);
+        return Result.success(orderDetailVO);
+    }
+
+    @ApiOperation("分页查询所有历史订单")
+    @GetMapping("/historyOrders")
+    public Result<PageResult> historyOrders(OrdersPageQueryDTO ordersPageQueryDTO){
+        PageResult pages = orderService.page(ordersPageQueryDTO);
+        return Result.success(pages);
+    }
+
+    @ApiOperation("取消订单")
+    @PutMapping("cancel/{id}")
+    public Result cancelOrder(@PathVariable Long id){
+        //status = 6
+        //cancel_time
+        orderService.cancel(id,"");
+        return Result.success();
+    }
+
+    @ApiOperation("再来一单")
+    @PostMapping("repetition/{id}")
+    public Result repetition(@PathVariable Long id){
+        orderService.repetition(id);
+        return Result.success();
+    }
 
 }

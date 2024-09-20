@@ -1,18 +1,19 @@
 package com.sky.service.impl;
 
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.constant.OrderConstant;
 import com.sky.constant.PaymentConstant;
 import com.sky.context.BaseContext;
-import com.sky.dto.OrdersPaymentDTO;
-import com.sky.dto.OrdersSubmitDTO;
-import com.sky.entity.AddressBook;
-import com.sky.entity.Orders;
-import com.sky.entity.ShoppingCart;
-import com.sky.entity.User;
+import com.sky.dto.*;
+import com.sky.entity.*;
 import com.sky.exception.OrderBusinessException;
 import com.sky.mapper.*;
+import com.sky.result.PageResult;
 import com.sky.service.OrderService;
+import com.sky.vo.OrderDetailForAdminVO;
+import com.sky.vo.OrderDetailVO;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
 import org.springframework.beans.BeanUtils;
@@ -20,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.sky.utils.WeChatPayUtil;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -29,7 +29,7 @@ import java.util.UUID;
 
 /**
  * @ClassName OrderServiceImpl
- * @Description TODO
+ * @Description
  * @Author msjoy
  * @Date 2024/9/19 16:29
  * @Version 1.0
@@ -165,5 +165,94 @@ public class OrderServiceImpl implements OrderService {
                 .build();
 
         orderMapper.update(orders);
+    }
+
+    @Override
+    public OrderDetailVO orderDetail(Long id) {
+        Long userId = BaseContext.getCurrentId();
+        Orders order = orderMapper.getOrderById(id, userId);
+        OrderDetailVO orderDetailVO = new OrderDetailVO();
+        BeanUtils.copyProperties(order, orderDetailVO);
+        List<OrderDetail> orderDetails = orderDetailMapper.getDetailByOrderId(id);
+        orderDetailVO.setOrderDetailList(orderDetails);
+        return orderDetailVO;
+    }
+
+    @Override
+    public PageResult page(OrdersPageQueryDTO ordersPageQueryDTO) {
+        Long userId = BaseContext.getCurrentId();
+        PageHelper.startPage(ordersPageQueryDTO.getPage(), ordersPageQueryDTO.getPageSize());
+        Page<OrderDetailVO> page = orderMapper.getOrdersByUserId(userId);
+        page.forEach(orderDetailVO -> {
+            orderDetailVO.setOrderDetailList(orderDetailMapper.getDetailByOrderId(orderDetailVO.getId()));
+        });
+        long total = page.getTotal();
+        List<OrderDetailVO> records = page.getResult();
+        return new PageResult(total, records);
+    }
+
+    @Override
+    public void cancel(Long id,String cancelReason) {
+        Orders order = orderMapper.getOrderById(id, BaseContext.getCurrentId());
+        order.setStatus(6);
+        order.setCancelTime(LocalDateTime.now());
+        order.setCancelReason(cancelReason);
+        orderMapper.cancel(order);
+    }
+
+    @Override
+    public void repetition(Long id) {
+        List<OrderDetail> detailByOrderId = orderDetailMapper.getDetailByOrderId(id);
+        LocalDateTime createTime = LocalDateTime.now();
+        detailByOrderId.forEach(orderDetail -> {
+            ShoppingCart shoppingCart = ShoppingCart.builder()
+                    .name(orderDetail.getName())
+                    .image(orderDetail.getImage())
+                    .userId(BaseContext.getCurrentId())
+                    .dishId(orderDetail.getDishId())
+                    .setmealId(orderDetail.getSetmealId())
+                    .dishFlavor(orderDetail.getDishFlavor())
+                    .number(orderDetail.getNumber())
+                    .amount(orderDetail.getAmount())
+                    .createTime(createTime)
+                    .build();
+            shoppingCartMapper.insertShoppingCart(shoppingCart);
+        });
+    }
+
+    @Override
+    public PageResult conditionSearch(OrdersPageQueryDTO ordersPageQueryDTO) {
+        Long userId = BaseContext.getCurrentId();
+        PageHelper.startPage(ordersPageQueryDTO.getPage(), ordersPageQueryDTO.getPageSize());
+        Page<OrderDetailForAdminVO> page = orderMapper.conditionSearch(ordersPageQueryDTO);
+        page.forEach(orderDetailForAdminVO -> {
+            List<String> orderNames = orderMapper.getOrdersNameById(orderDetailForAdminVO.getId());
+            String orderDishes = orderNames.toString();
+            orderDetailForAdminVO.setOrderDishes(orderDishes);
+        });
+        long total = page.getTotal();
+        List<OrderDetailForAdminVO> records = page.getResult();
+        return new PageResult(total, records);
+    }
+
+    @Override
+    public void complete(Long id) {
+        orderMapper.complete(id);
+    }
+
+    @Override
+    public void rejection(OrdersRejectionDTO ordersRejectionDTO) {
+        orderMapper.rejection(ordersRejectionDTO);
+    }
+
+    @Override
+    public void confirm(OrdersConfirmDTO ordersConfirmDTO) {
+        ordersConfirmDTO.setStatus(OrderConstant.ORDER_ACCEPTED);
+        orderMapper.confirm(ordersConfirmDTO);
+    }
+
+    @Override
+    public void delivery(Long id) {
+        orderMapper.delivery(id);
     }
 }
