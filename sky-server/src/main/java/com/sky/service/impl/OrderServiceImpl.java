@@ -2,6 +2,7 @@ package com.sky.service.impl;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.sky.Websocket.WebSocketServer;
 import com.sky.constant.MessageConstant;
 import com.sky.constant.OrderConstant;
 import com.sky.constant.PaymentConstant;
@@ -24,7 +25,9 @@ import com.sky.utils.WeChatPayUtil;
 import com.alibaba.fastjson.JSONObject;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -49,6 +52,8 @@ public class OrderServiceImpl implements OrderService {
     private OrderDetailMapper orderDetailMapper;
     @Autowired
     private WeChatPayUtil weChatPayUtil;
+    @Autowired
+    private WebSocketServer webSocketServer;
 
     @Override
     @Transactional
@@ -165,12 +170,20 @@ public class OrderServiceImpl implements OrderService {
                 .build();
 
         orderMapper.update(orders);
+
+        // 通过websocket向客户端浏览器推送消息 type orderId content
+        Map map = new HashMap();
+        map.put("type", 1); // 1:来单提醒， 2：客户催单
+        map.put("orderId", ordersDB.getId());
+        map.put("content", "订单号： "+ outTradeNo);
+        String jsonString = JSONObject.toJSONString(map);
+        webSocketServer.sendToAllClient(jsonString);
     }
 
     @Override
     public OrderDetailVO orderDetail(Long id) {
         Long userId = BaseContext.getCurrentId();
-        Orders order = orderMapper.getOrderById(id, userId);
+        Orders order = orderMapper.getOrderById(id);
         OrderDetailVO orderDetailVO = new OrderDetailVO();
         BeanUtils.copyProperties(order, orderDetailVO);
         List<OrderDetail> orderDetails = orderDetailMapper.getDetailByOrderId(id);
@@ -193,7 +206,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void cancel(Long id,String cancelReason) {
-        Orders order = orderMapper.getOrderById(id, BaseContext.getCurrentId());
+        Orders order = orderMapper.getOrderById(id);
         order.setStatus(6);
         order.setCancelTime(LocalDateTime.now());
         order.setCancelReason(cancelReason);
@@ -254,5 +267,16 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void delivery(Long id) {
         orderMapper.delivery(id);
+    }
+
+    @Override
+    public void reminder(Long orderId) {
+
+        Map map = new HashMap();
+        map.put("type", 2); // 1:来单提醒， 2：客户催单
+        map.put("orderId", orderId);
+        map.put("content", "订单号： "+ orderId.toString());
+        String jsonString = JSONObject.toJSONString(map);
+        webSocketServer.sendToAllClient(jsonString);
     }
 }

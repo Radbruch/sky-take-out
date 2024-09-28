@@ -31,8 +31,8 @@ public interface OrderMapper {
      */
     void update(Orders orders);
 
-    @Select("SELECT * FROM orders WHERE id = #{id} AND user_id = #{userId} ORDER BY order_time DESC")
-    Orders getOrderById(Long id, Long userId);
+    @Select("SELECT * FROM orders WHERE id = #{id} ORDER BY order_time DESC")
+    Orders getOrderById(Long id);
 
     /**
      * 通过id得到order+orderdetails的所有信息

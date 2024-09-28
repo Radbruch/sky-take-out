@@ -83,4 +83,6 @@ public interface OrderService {
      * @param id
      */
     void delivery(Long id);
+
+    void reminder(Long orderId);
 }
